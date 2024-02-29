@@ -1,0 +1,542 @@
+Iteration #1
+s: [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [1, 0, 0, 0, 1], [0, 1, 0, 0, 1], [0, 0, 1, 0, 1], [0, 0, 1, 1, 0]]
+r: [0.5, 2.6666666666666665, 1, 0.5, 1, 1]
+t: [[1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 1, 1]]
+Set parameter Username
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 8 rows, 6 columns and 23 nonzeros
+Model fingerprint: 0x4934ac69
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [5e-01, 3e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 8 rows and 6 columns
+Presolve time: 0.02s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.1666667e+00   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.03 seconds (0.00 work units)
+Optimal objective  3.166666667e+00
+Objective: 3.1666666666666665
+Z = 1.0
+Z = 1.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Dual values:
+Constraint1_0: -0.6666666666666665
+Constraint1_1: -1.1666666666666665
+Constraint1_2: -0.6666666666666665
+Constraint1_3: 1.6666666666666665
+Constraint1_4: 1.6666666666666665
+Constraint2_0: 2.333333333333333
+Constraint2_1: 0.0
+Constraint3: 0.0
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 14 columns and 27 nonzeros
+Model fingerprint: 0x27b03901
+Model has 5 quadratic constraints
+Variable types: 7 continuous, 7 integer (7 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+03]
+  Objective range  [7e-01, 2e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [2e+00, 1e+03]
+  QRHS range       [1e+03, 1e+03]
+Presolve removed 2 rows and 0 columns
+Presolve time: 0.04s
+Presolved: 7 rows, 14 columns, 30 nonzeros
+Presolved model has 1 quadratic constraint(s)
+Variable types: 8 continuous, 6 integer (6 binary)
+
+Root relaxation: objective -4.108778e+00, 5 iterations, 0.01 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -4.10878    0    3          -   -4.10878      -     -    0s
+H    0     0                    47001.916667   -4.10878   100%     -    0s
+     0     0   -2.16667    0    1 47001.9167   -2.16667   100%     -    0s
+H    0     0                       0.0000000   -2.16667      -     -    0s
+     0     0   -2.16667    0    2    0.00000   -2.16667      -     -    0s
+     0     0   -2.16658    0    5    0.00000   -2.16658      -     -    0s
+H    0     0                      -0.8116504   -2.16631   167%     -    0s
+     0     0   -2.16365    0    5   -0.81165   -2.16365   167%     -    0s
+     0     0   -2.16163    0    5   -0.81165   -2.16163   166%     -    0s
+H    0     0                      -0.8333333   -2.16163   159%     -    0s
+H    0     0                      -0.8514464   -2.16163   154%     -    0s
+     0     2   -2.16163    0    5   -0.85145   -2.16163   154%     -    0s
+H    1     2                      -1.3333333   -2.15669  61.8%   0.0    0s
+*    1     2               1      -1.3333333   -2.15669  61.8%   2.0    0s
+
+Cutting planes:
+  Cover: 1
+  MIR: 9
+  RLT: 1
+
+Explored 11 nodes (69 simplex iterations) in 0.19 seconds (0.00 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: -1.33333 -0.833333 0 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -1.333333328686e+00, best bound -1.333333333333e+00, gap 0.0000%
+Objective: -1.3333333286857858
+R[0] = 0.0
+R[1] = 0.0
+R[2] = 0.0
+R[3] = 1.0000087417136079
+R[4] = 0.9999912629339391
+S[0] = 0.0
+S[1] = 0.0
+S[2] = 0.0
+S[3] = 1.0
+S[4] = 1.0
+t[0] = 0.0
+t[1] = 0.0
+cx = 4.369694973823059e-06
+cy = -8.413116754817605e-06
+New cluster found
+[0, 0, 0, 1, 1]
+New optimal_values_t
+[0, 0]
+Warning: t value not correctly calculated
+Iteration #2
+s: [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [1, 0, 0, 0, 1], [0, 1, 0, 0, 1], [0, 0, 1, 0, 1], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1]]
+r: [0.5, 2.6666666666666665, 1, 0.5, 1, 1, 2.0000000046475472]
+t: [[1, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 1, 1, 1]]
+Master problem warm start
+optimal_values_t [0, 1]
+[0, 0, 0, 1, 1, 0, 1, 1]
+[<gurobi.Constr Constraint1_0>, <gurobi.Constr Constraint1_1>, <gurobi.Constr Constraint1_2>, <gurobi.Constr Constraint1_3>, <gurobi.Constr Constraint1_4>, <gurobi.Constr Constraint2_0>, <gurobi.Constr Constraint2_1>, <gurobi.Constr Constraint3>]
+<gurobi.Column: 0.0 Constraint1_0 0.0 Constraint1_1 0.0 Constraint1_2 1.0 Constraint1_3 1.0 Constraint1_4 0.0 Constraint2_0 1.0 Constraint2_1 1.0 Constraint3 >
+0.5 Z + 2.6666666666666665 Z + Z + 0.5 Z + Z + Z
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 8 rows, 7 columns and 27 nonzeros
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [5e-01, 3e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 2e+00]
+LP warm-start: use basis
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.3333333e+30   3.000000e+30   1.333333e+00      0s
+       2    3.1666667e+00   0.000000e+00   0.000000e+00      0s
+
+Solved in 2 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  3.166666667e+00
+Objective: 3.1666666666666665
+Z = 1.0
+Z = 1.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z[7] = 0.0
+Dual values:
+Constraint1_0: 0.6666666620191193
+Constraint1_1: 0.16666666201911928
+Constraint1_2: 0.6666666620191193
+Constraint1_3: 1.6666666666666665
+Constraint1_4: 1.6666666666666665
+Constraint2_0: 1.0000000046475472
+Constraint2_1: 0.0
+Constraint3: -1.3333333286857858
+Pricing problem warm start
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 14 columns and 27 nonzeros
+Model fingerprint: 0x8a8b65be
+Model has 5 quadratic constraints
+Variable types: 7 continuous, 7 integer (7 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+03]
+  Objective range  [2e-01, 2e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [2e+00, 1e+03]
+  QRHS range       [1e+03, 1e+03]
+
+MIP start from previous solve produced solution with objective 6.43618e-12 (0.00s)
+Loaded MIP start from previous solve with objective 9.14824e-14
+
+Presolve removed 2 rows and 0 columns
+Presolve time: 0.00s
+Presolved: 7 rows, 14 columns, 30 nonzeros
+Presolved model has 1 quadratic constraint(s)
+Variable types: 8 continuous, 6 integer (6 binary)
+Found heuristic solution: objective -0.1666667
+
+Root relaxation: objective -3.830000e+00, 6 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -3.83000    0    3   -0.16667   -3.83000  2198%     -    0s
+H    0     0                      -0.1666667   -3.83000  2198%     -    0s
+     0     0   -2.16667    0    2   -0.16667   -2.16667  1200%     -    0s
+     0     0   -2.16657    0    4   -0.16667   -2.16657  1200%     -    0s
+     0     0   -2.16631    0    4   -0.16667   -2.16631  1200%     -    0s
+     0     0   -2.16631    0    5   -0.16667   -2.16631  1200%     -    0s
+     0     0   -2.16590    0    5   -0.16667   -2.16590  1200%     -    0s
+     0     0   -2.00000    0    4   -0.16667   -2.00000  1100%     -    0s
+     0     0   -2.00000    0    4   -0.16667   -2.00000  1100%     -    0s
+     0     0   -1.94792    0    6   -0.16667   -1.94792  1069%     -    0s
+     0     0   -1.90222    0    6   -0.16667   -1.90222  1041%     -    0s
+     0     0   -1.82030    0    2   -0.16667   -1.82030   992%     -    0s
+     0     0   -1.82029    0    4   -0.16667   -1.82029   992%     -    0s
+     0     0   -1.78226    0    4   -0.16667   -1.78226   969%     -    0s
+     0     0   -1.78226    0    4   -0.16667   -1.78226   969%     -    0s
+     0     0   -1.78002    0    5   -0.16667   -1.78002   968%     -    0s
+     0     0   -1.78002    0    5   -0.16667   -1.78002   968%     -    0s
+     0     0   -1.76802    0    6   -0.16667   -1.76802   961%     -    0s
+     0     0   -1.76802    0    6   -0.16667   -1.76802   961%     -    0s
+     0     0   -1.76802    0    6   -0.16667   -1.76802   961%     -    0s
+H    0     0                      -0.8333333   -1.76802   112%     -    0s
+H    0     0                      -0.8333333   -1.76802   112%     -    0s
+     0     2   -1.76802    0    6   -0.83333   -1.76802   112%     -    0s
+
+Cutting planes:
+  Cover: 1
+  MIR: 6
+  Relax-and-lift: 2
+
+Explored 50 nodes (195 simplex iterations) in 0.03 seconds (0.00 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: -0.833333 -0.166667 9.14824e-14 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -8.333333305137e-01, best bound -8.334120501904e-01, gap 0.0094%
+Objective: -0.8333333305136543
+R[0] = 0.5555700154660599
+R[1] = 0.2221933052222831
+R[2] = 0.0
+R[3] = 0.0
+R[4] = 0.5555700154646694
+S[0] = 1.0
+S[1] = 1.0
+S[2] = -0.0
+S[3] = -0.0
+S[4] = 1.0
+t[0] = 1.0
+t[1] = 0.0
+cx = 0.3333116448788152
+cy = 0.3333116448788152
+New cluster found
+[1, 1, 0, 0, 1]
+New optimal_values_t
+[1, 0]
+Iteration #3
+s: [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [1, 0, 0, 0, 1], [0, 1, 0, 0, 1], [0, 0, 1, 0, 1], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [1, 1, 0, 0, 1]]
+r: [0.5, 2.6666666666666665, 1, 0.5, 1, 1, 2.0000000046475472, 1.3333333361530124]
+t: [[1, 0, 0, 0, 0, 0, 0, 1], [0, 1, 0, 0, 1, 1, 1, 0]]
+Master problem warm start
+optimal_values_t [1, 0]
+[1, 1, 0, 0, 1, 1, 0, 1]
+[<gurobi.Constr Constraint1_0>, <gurobi.Constr Constraint1_1>, <gurobi.Constr Constraint1_2>, <gurobi.Constr Constraint1_3>, <gurobi.Constr Constraint1_4>, <gurobi.Constr Constraint2_0>, <gurobi.Constr Constraint2_1>, <gurobi.Constr Constraint3>]
+<gurobi.Column: 1.0 Constraint1_0 1.0 Constraint1_1 0.0 Constraint1_2 0.0 Constraint1_3 1.0 Constraint1_4 1.0 Constraint2_0 0.0 Constraint2_1 1.0 Constraint3 >
+0.5 Z + 2.6666666666666665 Z + Z + 0.5 Z + Z + Z + 2.0000000046475472 Z[7]
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 8 rows, 8 columns and 32 nonzeros
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [5e-01, 3e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 2e+00]
+LP warm-start: use basis
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -8.3333333e+29   2.000000e+30   8.333333e-01      0s
+       1    2.3333333e+00   0.000000e+00   0.000000e+00      0s
+
+Solved in 1 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  2.333333336e+00
+Objective: 2.3333333361530126
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 1.0
+Z[7] = 0.0
+Z[8] = 1.0
+Dual values:
+Constraint1_0: 0.6666666620191193
+Constraint1_1: 0.16666666201911928
+Constraint1_2: 0.6666666620191193
+Constraint1_3: 1.6666666666666665
+Constraint1_4: 1.6666666666666665
+Constraint2_0: 0.16666667413389336
+Constraint2_1: 0.0
+Constraint3: -1.3333333286857858
+Pricing problem warm start
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 14 columns and 27 nonzeros
+Model fingerprint: 0x12a62e2d
+Model has 5 quadratic constraints
+Variable types: 7 continuous, 7 integer (7 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+03]
+  Objective range  [2e-01, 2e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [2e+00, 1e+03]
+  QRHS range       [1e+03, 1e+03]
+
+MIP start from previous solve produced solution with objective 3.06288e-08 (0.00s)
+Loaded MIP start from previous solve with objective 2.73872e-08
+
+Presolve removed 2 rows and 0 columns
+Presolve time: 0.00s
+Presolved: 7 rows, 14 columns, 30 nonzeros
+Presolved model has 1 quadratic constraint(s)
+Variable types: 8 continuous, 6 integer (6 binary)
+
+Root relaxation: objective -3.551111e+00, 6 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -3.55111    0    3    0.00000   -3.55111      -     -    0s
+H    0     0                       0.0000000   -3.55111      -     -    0s
+     0     0   -1.33333    0    2    0.00000   -1.33333      -     -    0s
+     0     0   -1.33329    0    5    0.00000   -1.33329      -     -    0s
+H    0     0                      -0.0000000   -1.33306      -     -    0s
+     0     0   -1.33306    0    6   -0.00000   -1.33306      -     -    0s
+     0     0   -1.29167    0    5   -0.00000   -1.29167      -     -    0s
+     0     0   -1.25000    0    6   -0.00000   -1.25000      -     -    0s
+     0     0   -1.22222    0    6   -0.00000   -1.22222      -     -    0s
+     0     0   -1.22222    0    6   -0.00000   -1.22222      -     -    0s
+     0     2   -1.22222    0    6   -0.00000   -1.22222      -     -    0s
+H   24    16                      -0.0833324   -1.00000  1100%   3.6    0s
+H   34    11                      -0.0833333   -1.00000  1100%   3.4    0s
+*   34    11               6      -0.0833333   -1.00000  1100%   3.5    0s
+H   53     1                      -0.1666666   -0.47855   187%   3.6    0s
+*   53     1               6      -0.1666666   -0.47855   187%   3.7    0s
+
+Cutting planes:
+  Gomory: 1
+  MIR: 11
+
+Explored 64 nodes (249 simplex iterations) in 0.05 seconds (0.00 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: -0.166667 -0.0833333 -0.0833324 -2.41296e-12 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -1.666666526833e-01, best bound -1.666666666667e-01, gap 0.0000%
+Objective: -0.16666665268325742
+R[0] = 0.0
+R[1] = 0.0
+R[2] = 0.0
+R[3] = 1.0000119483890026
+R[4] = 0.9999880655944066
+S[0] = 0.0
+S[1] = 1.0
+S[2] = 0.0
+S[3] = 1.0
+S[4] = 1.0
+t[0] = 0.0
+t[1] = 0.0
+cx = 5.970698829668539e-06
+cy = 0.0
+New cluster found
+[0, 1, 0, 1, 1]
+New optimal_values_t
+[0, 0]
+Warning: t value not correctly calculated
+Iteration #4
+s: [[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [1, 0, 0, 0, 1], [0, 1, 0, 0, 1], [0, 0, 1, 0, 1], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [1, 1, 0, 0, 1], [0, 1, 0, 1, 1]]
+r: [0.5, 2.6666666666666665, 1, 0.5, 1, 1, 2.0000000046475472, 1.3333333361530124, 2.000000013983409]
+t: [[1, 0, 0, 0, 0, 0, 0, 1, 0], [0, 1, 0, 0, 1, 1, 1, 0, 1]]
+Master problem warm start
+optimal_values_t [0, 1]
+[0, 1, 0, 1, 1, 0, 1, 1]
+[<gurobi.Constr Constraint1_0>, <gurobi.Constr Constraint1_1>, <gurobi.Constr Constraint1_2>, <gurobi.Constr Constraint1_3>, <gurobi.Constr Constraint1_4>, <gurobi.Constr Constraint2_0>, <gurobi.Constr Constraint2_1>, <gurobi.Constr Constraint3>]
+<gurobi.Column: 0.0 Constraint1_0 1.0 Constraint1_1 0.0 Constraint1_2 1.0 Constraint1_3 1.0 Constraint1_4 0.0 Constraint2_0 1.0 Constraint2_1 1.0 Constraint3 >
+0.5 Z + 2.6666666666666665 Z + Z + 0.5 Z + Z + Z + 2.0000000046475472 Z[7] + 1.3333333361530124 Z[8]
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 8 rows, 9 columns and 37 nonzeros
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [5e-01, 3e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 2e+00]
+LP warm-start: use basis
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.6666665e+29   2.000000e+30   1.666667e-01      0s
+       1    2.3333333e+00   0.000000e+00   0.000000e+00      0s
+
+Solved in 1 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  2.333333336e+00
+Objective: 2.3333333361530126
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 0.0
+Z = 1.0
+Z[7] = 0.0
+Z[8] = 1.0
+Z[9] = 0.0
+Dual values:
+Constraint1_0: 0.6666666620191193
+Constraint1_1: 9.335861861359263e-09
+Constraint1_2: 0.6666666620191193
+Constraint1_3: 1.6666666666666665
+Constraint1_4: 1.6666666666666665
+Constraint2_0: 0.3333333268171508
+Constraint2_1: 0.0
+Constraint3: -1.3333333286857858
+Pricing problem warm start
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 14 columns and 27 nonzeros
+Model fingerprint: 0x6c9fa57c
+Model has 5 quadratic constraints
+Variable types: 7 continuous, 7 integer (7 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+03]
+  Objective range  [9e-09, 2e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [2e+00, 1e+03]
+  QRHS range       [1e+03, 1e+03]
+
+MIP start from previous solve produced solution with objective 7.02107e-09 (0.00s)
+Loaded MIP start from previous solve with objective 0
+
+Presolve removed 2 rows and 0 columns
+Presolve time: 0.00s
+Presolved: 7 rows, 14 columns, 30 nonzeros
+Presolved model has 1 quadratic constraint(s)
+Variable types: 8 continuous, 6 integer (6 binary)
+
+Root relaxation: objective -3.440222e+00, 6 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -3.44022    0    3    0.00000   -3.44022      -     -    0s
+H    0     0                      -0.0000000   -3.44022      -     -    0s
+     0     0   -1.33333    0    2   -0.00000   -1.33333      -     -    0s
+     0     0   -1.33332    0    4   -0.00000   -1.33332      -     -    0s
+     0     0   -1.33310    0    4   -0.00000   -1.33310      -     -    0s
+     0     0   -1.33310    0    5   -0.00000   -1.33310      -     -    0s
+     0     0   -1.33300    0    6   -0.00000   -1.33300      -     -    0s
+     0     2   -1.33290    0    6   -0.00000   -1.33290      -     -    0s
+*  162     6               6      -0.0000024   -0.00014  5874%   1.8    0s
+
+Cutting planes:
+  MIR: 6
+
+Explored 191 nodes (341 simplex iterations) in 0.04 seconds (0.00 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: -2.38127e-06 -1.39834e-08 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective -2.381274378127e-06, best bound -2.381274378127e-06, gap 0.0000%
+Objective: -2.381274378127074e-06
+R[0] = 0.0
+R[1] = 0.0
+R[2] = 0.4446306093215479
+R[3] = 1.1101654325005192
+R[4] = 1.1118682435702214
+S[0] = -0.0
+S[1] = -0.0
+S[2] = 1.0
+S[3] = 1.0
+S[4] = 1.0
+t[0] = -0.0
+t[1] = 0.0
+cx = -0.0004257027674255473
+cy = -0.3331931143569112
+New cluster found
+[0, 0, 1, 1, 1]
+New optimal_values_t
+[0, 0]
+Terminate
+Number of iterations 5
+Objective: 2.3333333361530126
+Z:
+[0, 0, 0, 0, 0, 1, 0, 1, 0]
+s:
+[[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [1, 0, 0, 0, 1], [0, 1, 0, 0, 1], [0, 0, 1, 0, 1], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [1, 1, 0, 0, 1], [0, 1, 0, 1, 1]]
+Clusters:
+[0, 0, 1, 1, 0]
+[1, 1, 0, 0, 1]
+Warning for adding constraints: zero or small (< 1e-13) coefficients, ignored
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (mac64[rosetta2] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 8 rows, 9 columns and 37 nonzeros
+Model fingerprint: 0x15e54704
+Variable types: 0 continuous, 9 integer (9 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [5e-01, 3e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Found heuristic solution: objective 3.1666667
+Presolve removed 8 rows and 9 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 8 available processors)
+
+Solution count 2: 2.33333 3.16667 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.333333336153e+00, best bound 2.333333336153e+00, gap 0.0000%
+Objective: 2.3333333361530126
+Z[0] = 0.0
+Z[1] = 0.0
+Z[2] = 0.0
+Z[3] = 0.0
+Z[4] = 0.0
+Z[5] = 1.0
+Z[6] = 0.0
+Z[7] = 1.0
+Z[8] = 0.0
