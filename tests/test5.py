@@ -2,8 +2,9 @@ from utils import *
 from gurobipy import Env
 
 env = Env()
+env.setParam('OutputFlag', 0)
 filename = "test5"
-n = 10000
+n = 40
 K = 5
 seed = 5
 l = 3
@@ -24,7 +25,7 @@ r = dist.copy()
 s = clusters.copy()
 m = K
 
-s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives = main_loop(2000,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,X[:,0],X[:,1],centers)
+s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives = main_loop(5,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,X[:,0],X[:,1],centers)
 
 visualize_result(s, r, t, n, K, masterobj, optimal_values_Z, centers, objectives, X, labels, filename)
 

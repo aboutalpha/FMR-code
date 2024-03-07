@@ -2,6 +2,7 @@ from utils import *
 from gurobipy import Env
 
 env = Env()
+env.setParam('OutputFlag', 0)
 filename = "test2"
 n = 20
 K = 5

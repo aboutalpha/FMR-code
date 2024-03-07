@@ -1,2 +1,1 @@
-python test4.py > ./outputs/out4.txt
-python test5.py > ./outputs/out5.txt
+python test6.py > ./outputs/out6_200_display.txt

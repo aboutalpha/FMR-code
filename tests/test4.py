@@ -1,11 +1,13 @@
 from utils import *
 from gurobipy import Env
+import sys
 
 env = Env()
+env.setParam('OutputFlag', 0)
 filename = "test4"
 n = 1000
 K = 5
-seed = 5
+seed = int(sys.argv[1])
 l = 3
 alpha = 1/2
 beta = [1,1,1]
