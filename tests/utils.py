@@ -297,6 +297,7 @@ def main_loop(iterations,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,x,y,optimal_ce
   pbar = tqdm(total=iterations)
   objectives = []
   times = []
+  slacks = []
   while counter < iterations:
     counter += 1
     pbar.update(1)
@@ -310,6 +311,7 @@ def main_loop(iterations,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,x,y,optimal_ce
     else:
       master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum = master_warm_start(master_model, Z, m, n, l, new_r, optimal_values_s, optimal_values_t, True, slack_var)
       objectives.append(masterobj)
+    slacks.append(optimal_slack_sum)
     print(counter, "Slack variables", optimal_slack)
     print(counter, "Sum of Slack Variables", optimal_slack_sum)
     print(counter, "Master Objective", masterobj)
@@ -336,6 +338,7 @@ def main_loop(iterations,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,x,y,optimal_ce
         for i in range(len(s)):
           if optimal_values_Z[i] > 0:
             print(s[i])
+        print("Slacks",slacks)
         return s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives
     for solNum in range(len(reduced_cost)):
       if optimal_values_s[solNum] in repeat_check or optimal_values_s[solNum] in s:
@@ -366,6 +369,8 @@ def main_loop(iterations,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,x,y,optimal_ce
       m += 1
 
   #masterobj, optimal_values_Z = solve_master_problem_integer(n, m, l, r, s, t, beta, K)
+
+  print("Slacks",slacks)
 
   return s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives
   
