@@ -7,7 +7,7 @@ from tqdm import tqdm
 from datetime import datetime
 
 
-def master_optimize(model, m, n, l, Z):
+def master_optimize(model, m, n, l, Z, slack, slack_var):
     # Solve the problem
     model.optimize()
 
@@ -40,34 +40,33 @@ def master_optimize(model, m, n, l, Z):
 
     optimal_values_Z = [(Z[k].x) for k in range(m)]
 
-    return model, mu, lmd, model.objVal, optimal_values_Z, delta, Z
+    optimal_slack = []
+    optimal_slack_sum = -1
+    if slack:
+       optimal_slack = [(slack_var[k].x) for k in range(n)]
+       optimal_slack_sum = sum(optimal_slack)
+
+    return model, mu, lmd, model.objVal, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum
 
 
-def master_warm_start(model, Z, m, n, l, new_r, optimal_values_s, optimal_values_t):
+def master_warm_start(model, Z, m, n, l, new_r_list, optimal_values_s_list, optimal_values_t_list, slack = False, slack_var = None):
+  for solNum in range(len(new_r_list)):
+    new_r = new_r_list[solNum]
     constrs = model.getConstrs()
-    optimal_values_s = optimal_values_s.copy()
-    # print("optimal_values_t", optimal_values_t)
-    for i in optimal_values_t:
-        optimal_values_s.append(i)  # new column
+    optimal_values_s = optimal_values_s_list[solNum].copy()
+    for i in optimal_values_t_list[solNum]:
+      optimal_values_s.append(i) # new column
     optimal_values_s.append(1)
-    # print(optimal_values_s)
-    # print(constrs[: n + l + 1])
-    # print(gp.Column(optimal_values_s, constrs[: n + l + 1]))
-    new_z = model.addVar(
-        vtype=GRB.CONTINUOUS,
-        name="Z[" + str(m) + "]",
-        column=gp.Column(optimal_values_s, constrs[: n + l + 1]),
-    )
+    new_z = model.addVar(vtype=GRB.CONTINUOUS, name="Z["+str(m)+"]", column = gp.Column(optimal_values_s,constrs[:n+l+1]))
     Z += [new_z]
     model.setObjective(model.getObjective() + new_z * new_r, GRB.MINIMIZE)
-    #print(model.display())
-    return master_optimize(model, m, n, l, Z)
+  return master_optimize(model,m,n,l,Z,slack,slack_var)
 
 
-def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K):
+def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack = False):
     # Create a Gurobi model
     model = gp.Model("MasterProblem")
-    # model.Params.LogToConsole = 0
+    model.Params.LogToConsole = 0
 
     # Create decision variables
     Z = []
@@ -75,20 +74,33 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K):
         Z.append(model.addVar(vtype=GRB.CONTINUOUS, name="Z"))
     # Z = model.addMVar(m, vtype=GRB.CONTINUOUS, name="Z")
 
+    slack_var = [model.addVar(vtype=GRB.CONTINUOUS, name="Slack") for _ in range(n)]
     # Set objective function
-    model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)), GRB.MINIMIZE)
+    if slack == False:
+        model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)), GRB.MINIMIZE)
+    else:
+        model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) + 20 * gp.quicksum(slack_var[i] for i in range(n)), GRB.MINIMIZE)
 
     # Constraints
     constraint1 = []
     constraint2 = []
 
-    for i in range(n):
-        constraint1.append(
-            model.addConstr(
-                gp.quicksum(s[k][i] * Z[k] for k in range(m)) == 1,
-                name="Constraint1_" + str(i),
+    if slack == False:
+        for i in range(n):
+            constraint1.append(
+                model.addConstr(
+                    gp.quicksum(s[k][i] * Z[k] for k in range(m)) == 1,
+                    name="Constraint1_" + str(i),
+                )
             )
-        )
+    else:
+       for i in range(n):
+            constraint1.append(
+                model.addConstr(
+                    gp.quicksum(s[k][i] * Z[k] for k in range(m)) + slack_var[i]== 1,
+                    name="Constraint1_" + str(i),
+                )
+            )
 
     for g in range(l):
         constraint2.append(
@@ -106,7 +118,7 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K):
     #     model.addConstr(Z[k] <= 1, name="Constraint4_"+str(k))
     #     model.addConstr(Z[k] >= 0, name="Constraint5_"+str(k))
 
-    return master_optimize(model, m, n, l, Z)
+    return master_optimize(model, m, n, l, Z, slack, slack_var)
 
 
 def solve_master_problem_integer(n, m, l, r, s, t, beta, K):
@@ -159,109 +171,100 @@ def solve_master_problem_integer(n, m, l, r, s, t, beta, K):
     return model.objVal, optimal_values_Z
 
 
-def pricing_warm_start(
-    model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var, cy_var
-):
-    objective = (
-        gp.quicksum(r_var[i] for i in range(n))
-        - gp.quicksum(mu[i] * s_var[i] for i in range(n))
-        - gp.quicksum(lmd[g] * t_var[g] for g in range(l))
-        - delta
-    )
-    model.setObjective(objective, GRB.MINIMIZE)
-    model.optimize()
-    # Print objective value
-    # print("Objective:", model.objVal)
+def pricing_warm_start(model,r_var,mu,s_var,lmd,t_var,delta,n,l,cx_var,cy_var):
+  objective = gp.quicksum(r_var[i] for i in range(n)) \
+                - gp.quicksum(mu[i] * s_var[i] for i in range(n)) \
+                - gp.quicksum(lmd[g] * t_var[g] for g in range(l)) \
+                - delta
+  model.setObjective(objective,GRB.MINIMIZE)
+  model.optimize()
+  # Print objective value
+  # print('Objective:', model.objVal)
 
-    # Print variable values
-    # for var in model.getVars():
-    #     print(f"{var.varName} = {var.x}")
+  # print("Number of solutions", model.SolCount)
+  nSolutions = model.SolCount
 
-    # Print constraints
-    # for constr in constraints:
-    #   print(constr)
+  objectives = []
+  optimal_values_s = []
+  optimal_values_r = []
+  optimal_values_t = []
+  optimal_center = []
 
-    optimal_values_s = [int(np.round(s_var[i].x)) for i in range(n)]
-    optimal_values_r = [float(r_var[i].x) for i in range(n)]
-    optimal_values_t = [int(np.round(t_var[g].x)) for g in range(l)]
-    optimal_center = (cx_var.x, cy_var.x)
+  for e in range(nSolutions):
+        # print("Solution Number",e)
+        model.setParam(GRB.Param.SolutionNumber, e)
+        # print("Objective", model.PoolObjVal)
+        objectives.append(model.PoolObjVal)
+        # Print variable values
+        # for var in model.getVars():
+        #   print(f"{var.varName} = {var.Xn}")
 
-    return (
-        model.objVal,
-        optimal_values_s,
-        optimal_values_r,
-        optimal_values_t,
-        optimal_center,
-    )
+        optimal_values_s.append([int(np.round(s_var[i].Xn)) for i in range(n)])
+        optimal_values_r.append([float(r_var[i].Xn) for i in range(n)])
+        optimal_values_t.append([int(np.round(t_var[g].Xn)) for g in range(l)])
+        optimal_center.append((cx_var.x,cy_var.Xn))
+
+  return objectives,optimal_values_s, optimal_values_r, optimal_values_t, optimal_center
 
 
-def solve_pricing_problem_gurobi(
-    n, l, r, q, alpha, beta, delta, K, M, x, y, mu, lmd, lower, upper
-):
+def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu, lmd, lower, upper):
     # Create a Gurobi model
     model = gp.Model("PricingProblem")
-    model.Params.timelimit = 100.0
+    model.Params.PoolSearchMode = 2
+    model.Params.PoolSolutions = 10
+    model.Params.TimeLimit = 20
+    model.Params.MIPGap = 0.1
     #model.Params.LogToConsole = 0
-    model.Params.MIPGap = 0.01
 
     # Create decision variables
     r = model.addMVar(n, vtype=GRB.CONTINUOUS, name="R")
     s = model.addMVar(n, vtype=GRB.BINARY, name="S")
     t = model.addMVar(l, vtype=GRB.BINARY, name="t")
-    cx = model.addVar(vtype=GRB.CONTINUOUS, lb=-100, name="cx")
-    cy = model.addVar(vtype=GRB.CONTINUOUS, lb=-100, name="cy")
+    cx = model.addVar(vtype=GRB.CONTINUOUS, lb = -100, name="cx")
+    cy = model.addVar(vtype=GRB.CONTINUOUS, lb = -100, name="cy")
 
     # Objective function
 
-    objective = (
-        gp.quicksum(r[i] for i in range(n))
-        - gp.quicksum(mu[i] * s[i] for i in range(n))
-        - gp.quicksum(lmd[g] * t[g] for g in range(l))
-        - delta
-    )
-    model.setObjective(objective, GRB.MINIMIZE)
+    objective = gp.quicksum(r[i] for i in range(n)) \
+                - gp.quicksum(mu[i] * s[i] for i in range(n)) \
+                - gp.quicksum(lmd[g] * t[g] for g in range(l)) \
+                - delta
+    model.setObjective(objective , GRB.MINIMIZE)
 
     # Constraints
     constraints = []
 
     for g in range(l):
-        constraints.append(
-            model.addConstr(
-                gp.quicksum(q[g][i] * s[i] for i in range(n)) + M * (1 - t[g])
-                >= alpha * gp.quicksum(s[i] for i in range(n)),
-                name="Constraint1",
-            )
-        )
+      constraints.append(model.addConstr(gp.quicksum(q[g][i] * s[i] for i in range(n)) + M*(1-t[g]) >= alpha * gp.quicksum(s[i] for i in range(n)), name="Constraint1"))
 
     for i in range(n):
-        constraints.append(
-            model.addConstr(
-                r[i] + M * (1 - s[i]) >= (x[i] - cx) ** 2 + (y[i] - cy) ** 2,
-                name="Constraint2",
-            )
-        )
-        constraints.append(model.addConstr(r[i] >= 0, name="Constraint3"))
+      constraints.append(model.addConstr(r[i] + M*(1-s[i]) >= (x[i] - cx)**2 + (y[i] - cy)**2, name="Constraint2"))
+      constraints.append(model.addConstr(r[i] >= 0, name="Constraint3"))
 
-    constraints.append(
-        model.addConstr(
-            gp.quicksum(s[i] for i in range(n)) >= lower, name="Constraint3"
-        )
-    )
-    constraints.append(
-        model.addConstr(
-            gp.quicksum(s[i] for i in range(n)) <= upper, name="Constraint4"
-        )
-    )
+    constraints.append(model.addConstr(gp.quicksum(s[i] for i in range(n)) >= lower, name="Constraint3"))
+    constraints.append(model.addConstr(gp.quicksum(s[i] for i in range(n)) <= upper, name="Constraint4"))
 
     # Solve the problem
     model.optimize()
 
     # Print objective value
-    # print("Objective:", model.objVal)
+    # print('Objective:', model.objVal)
+
+    print("Number of solutions", model.SolCount)
+    nSolutions = model.SolCount
+
+
+    # for e in range(nSolutions):
+    #       print("Solution Number",e)
+    #       model.setParam(GRB.Param.SolutionNumber, e)
+    #       print("Objective", model.PoolObjVal)
+    #       # Print variable values
+    #       for var in model.getVars():
+    #         print(f"{var.varName} = {var.Xn}")
 
     # Print variable values
     # for var in model.getVars():
-    #     print(f"{var.varName} = {var.x}")
+    #   print(f"{var.varName} = {var.Xn}")
 
     # Print constraints
     # for constr in constraints:
@@ -270,21 +273,9 @@ def solve_pricing_problem_gurobi(
     optimal_values_s = [int(np.round(s[i].x)) for i in range(n)]
     optimal_values_r = [float(r[i].x) for i in range(n)]
     optimal_values_t = [int(np.round(t[g].x)) for g in range(l)]
-    optimal_center = (cx.x, cy.x)
+    optimal_center = (cx.x,cy.x)
 
-    return (
-        model,
-        model.objVal,
-        optimal_values_s,
-        optimal_values_r,
-        optimal_values_t,
-        optimal_center,
-        r,
-        s,
-        t,
-        cx,
-        cy,
-    )
+    return model, [model.objVal], [optimal_values_s], [optimal_values_r], [optimal_values_t], [optimal_center], r, s, t, cx, cy
 
 
 def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
@@ -297,129 +288,87 @@ def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
                 # print("Warning: t value not correctly calculated")
                 optimal_values_t[i] = 1
 
+def main_loop(iterations,K,n,m,l,r,beta,s,t,alpha,M,q,lower,upper,x,y,optimal_centers):
+  reduced_cost = 1
+  counter = 0
+  master_model = None
+  pricing_model = None
+  Z = None
+  pbar = tqdm(total=iterations)
+  objectives = []
+  times = []
+  while counter < iterations:
+    counter += 1
+    pbar.update(1)
+    print("Iteration #" + str(counter))
+    time = datetime.now()
+    times.append(time)
+    print("Time", time)
+    if not master_model:
+      master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum = solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack = True)
+      objectives.append(masterobj)
+    else:
+      master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum = master_warm_start(master_model, Z, m, n, l, new_r, optimal_values_s, optimal_values_t, True, slack_var)
+      objectives.append(masterobj)
+    print(counter, "Slack variables", optimal_slack)
+    print(counter, "Sum of Slack Variables", optimal_slack_sum)
+    print(counter, "Master Objective", masterobj)
+    print(counter, "Master Solution", optimal_values_Z)
+    print(counter, "Master Dual", mu)
+    if not pricing_model:
+      pricing_model, reduced_cost, optimal_values_s, optimal_values_r, optimal_values_t, optimal_center,r_var, s_var, t_var, cx_var, cy_var = solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu, lmd, lower, upper)
+    else:
+      reduced_cost, optimal_values_s, optimal_values_r, optimal_values_t, optimal_center = pricing_warm_start(pricing_model,r_var,mu,s_var,lmd,t_var,delta,n,l,cx_var,cy_var)
+    
+    new_r = []
+    repeat_check = []
+    print("Reduced Cost", reduced_cost)
+    print("Solutions Found", optimal_values_s)
+    if reduced_cost[0] >= -1e-2:
+        print("Terminate")
+        print("Number of iterations", counter)
+        print("Objective:",masterobj)
+        print("Z:")
+        print(optimal_values_Z)
+        print("s:")
+        print(s)
+        print("Clusters:")
+        for i in range(len(s)):
+          if optimal_values_Z[i] > 0:
+            print(s[i])
+        return s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives
+    for solNum in range(len(reduced_cost)):
+      if optimal_values_s[solNum] in repeat_check or optimal_values_s[solNum] in s:
+        continue
+      repeat_check.append(optimal_values_s[solNum])
+      xc = 0
+      yc = 0
+      size = sum(optimal_values_s[solNum])
+      for j in range(len(optimal_values_s[solNum])):
+        if optimal_values_s[solNum][j] == 1:
+          xc += x[j]
+          yc += y[j]
+      xc = xc / size
+      yc = yc / size
+      dist = 0
+      for j in range(len(optimal_values_s[solNum])):
+        if optimal_values_s[solNum][j] == 1:
+          dist += (xc - x[j]) ** 2 + (yc - y[j]) ** 2
+      optimal_centers.append((xc,yc))
+      print(counter, "Solution", solNum, "Pricing New cluster", optimal_values_s[solNum])
+      print(counter, "Solution", solNum, dist)
+      s.append(optimal_values_s[solNum])
+      new_r.append(dist)
+      r.append(dist)
+      t_value_correction(optimal_values_s[solNum],l,q,alpha,optimal_values_t[solNum])
+      for g in range(l):
+        t[g].append(optimal_values_t[solNum][g])
+      m += 1
 
-def main_loop(
-    iterations,
-    K,
-    n,
-    m,
-    l,
-    r,
-    beta,
-    s,
-    t,
-    alpha,
-    M,
-    q,
-    lower,
-    upper,
-    x,
-    y,
-    optimal_centers,
-):
-    reduced_cost = 1
-    counter = 1
-    master_model = None
-    pricing_model = None
-    Z = None
-    objectives = []
-    pbar = tqdm(total=iterations)
-    times = []
-    while counter < iterations:
-        pbar.update(1)
-        print("Iteration #" + str(counter))
-        time = datetime.now()
-        times.append(time)
-        print("Time", time)
-        # print("s:", s)
-        # print("r:", r)
-        # print("t:", t)
-        counter += 1
-        if not master_model:
-            master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z = (
-                solve_master_problem_gurobi(n, m, l, r, s, t, beta, K)
-            )
-            objectives.append(masterobj)
-        else:
-            #print("Master problem warm start")
-            master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z = (
-                master_warm_start(
-                    master_model, Z, m, n, l, new_r, optimal_values_s, optimal_values_t
-                )
-            )
-            objectives.append(masterobj)
-        print(counter, "Master Objective", masterobj)
-        print(counter, "Master Solution", optimal_values_Z)
-        print(counter, "Master Dual", delta)
-        if not pricing_model:
-            (
-                pricing_model,
-                reduced_cost,
-                optimal_values_s,
-                optimal_values_r,
-                optimal_values_t,
-                optimal_center,
-                r_var,
-                s_var,
-                t_var,
-                cx_var,
-                cy_var,
-            ) = solve_pricing_problem_gurobi(
-                n, l, r, q, alpha, beta, delta, K, M, x, y, mu, lmd, lower, upper
-            )
-        else:
-            #print("Pricing problem warm start")
-            (
-                reduced_cost,
-                optimal_values_s,
-                optimal_values_r,
-                optimal_values_t,
-                optimal_center,
-            ) = pricing_warm_start(
-                pricing_model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var, cy_var
-            )
+  #masterobj, optimal_values_Z = solve_master_problem_integer(n, m, l, r, s, t, beta, K)
 
-        optimal_centers.append(optimal_center)
-        print(counter, "Pricing New cluster", optimal_values_s)
-        if reduced_cost >= -1e-2:
-            print("Terminate")
-            print("Number of iterations", counter)
-            print("Objective:", masterobj)
-            print("Z:")
-            print(optimal_values_Z)
-            print("s:")
-            print(s)
-            print("Clusters:")
-            for i in range(len(s)):
-                if optimal_values_Z[i] > 0:
-                    print(s[i])
-            break
-        if optimal_values_s in s:
-            # raise Exception("Error: Repetition")
-            print("Repetition found. Terminate.")
-            print("Number of iterations", counter)
-            print("Objective:", masterobj)
-            print("Z:")
-            print(optimal_values_Z)
-            print("s:")
-            print(s)
-            print("Clusters:")
-            for i in range(len(s)):
-                if optimal_values_Z[i] > 0:
-                    print(s[i])
-        s.append(optimal_values_s)
-        new_r = sum(optimal_values_r)
-        r.append(new_r)
-        t_value_correction(optimal_values_s, l, q, alpha, optimal_values_t)
-        for g in range(l):
-            t[g].append(optimal_values_t[g])
-        m += 1
-
-    # masterobj, optimal_values_Z = solve_master_problem_integer(
-    #     n, m, l, r, s, t, beta, K
-    # )
-
-    return s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives
+  return s, r, t, masterobj, optimal_values_Z, optimal_centers, objectives
+  
 
 def initialize_clusters(X,K,l,alpha,beta,n,labels,M,lower,upper):
   #Set up labels info

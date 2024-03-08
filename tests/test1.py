@@ -1,4 +1,4 @@
-from tests.utils import *
+from utils import *
 
 K = 2
 n = 5

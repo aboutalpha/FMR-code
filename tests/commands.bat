@@ -1,1 +1,1 @@
-python test6.py > ./outputs/out6_200_display.txt
+python test7.py > ./outputs/out7_slack3.txt
