@@ -1,1 +1,1 @@
-python test8.py > ./outputs/out8_slack1.txt
+python test7.py > ./outputs/out7_slack4.txt
