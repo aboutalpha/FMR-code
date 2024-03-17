@@ -11,6 +11,9 @@ def master_optimize(model, m, n, l, Z, slack, slack_var):
     # Solve the problem
     model.optimize()
 
+    #print("Display")
+    #print(model.display())
+
     # Print objective value
     #print("Objective:", model.objVal)
 
@@ -50,16 +53,25 @@ def master_optimize(model, m, n, l, Z, slack, slack_var):
 
 
 def master_warm_start(model, Z, m, n, l, new_r_list, optimal_values_s_list, optimal_values_t_list, slack = False, slack_var = None):
+  #print("Warm Start")
+  #print("New r list", new_r_list)
   for solNum in range(len(new_r_list)):
     new_r = new_r_list[solNum]
     constrs = model.getConstrs()
     optimal_values_s = optimal_values_s_list[solNum].copy()
+    #print(new_r, optimal_values_s)
     for i in optimal_values_t_list[solNum]:
       optimal_values_s.append(i) # new column
     optimal_values_s.append(1)
-    new_z = model.addVar(vtype=GRB.CONTINUOUS, name="Z["+str(m)+"]", column = gp.Column(optimal_values_s,constrs[:n+l+1]))
+    #print("optimal_values_s",optimal_values_s)
+    new_z = model.addVar(vtype=GRB.CONTINUOUS, name="Z["+str(m-len(new_r_list)+solNum)+"]", column = gp.Column(optimal_values_s,constrs[:n+l+1]), obj = new_r)
+    all_vars = model.getVars()
+    names = model.getAttr("VarName", all_vars)
+    #print("Names",names)
     Z += [new_z]
-    model.setObjective(model.getObjective() + new_z * new_r, GRB.MINIMIZE)
+    #model.setObjective(model.getObjective() + new_z * new_r, GRB.MINIMIZE)
+  #print("Display")
+  #print(model.display())
   return master_optimize(model,m,n,l,Z,slack,slack_var)
 
 
@@ -71,10 +83,10 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack = False):
     # Create decision variables
     Z = []
     for i in range(m):
-        Z.append(model.addVar(vtype=GRB.CONTINUOUS, name="Z"))
+        Z.append(model.addVar(vtype=GRB.CONTINUOUS, name="Z " + str(i)))
     # Z = model.addMVar(m, vtype=GRB.CONTINUOUS, name="Z")
 
-    slack_var = [model.addVar(vtype=GRB.CONTINUOUS, name="Slack") for _ in range(n)]
+    slack_var = [model.addVar(vtype=GRB.CONTINUOUS, name="Slack " + str(i)) for i in range(n)]
     # Set objective function
     if slack == False:
         model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)), GRB.MINIMIZE)
@@ -212,7 +224,7 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
     model = gp.Model("PricingProblem")
     model.Params.PoolSearchMode = 2
     model.Params.PoolSolutions = 10
-    model.Params.TimeLimit = 20
+    model.Params.TimeLimit = 5
     model.Params.MIPGap = 0.1
     #model.Params.LogToConsole = 0
 
