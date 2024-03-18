@@ -46,7 +46,7 @@ def master_optimize(model, m, n, l, Z, slack, slack_var):
     optimal_slack = []
     optimal_slack_sum = -1
     if slack:
-       optimal_slack = [(slack_var[k].x) for k in range(n)]
+       optimal_slack = [(slack_var[k].x) for k in range(n+l)]
        optimal_slack_sum = sum(optimal_slack)
 
     return model, mu, lmd, model.objVal, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum
@@ -86,12 +86,12 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack = False):
         Z.append(model.addVar(vtype=GRB.CONTINUOUS, name="Z " + str(i)))
     # Z = model.addMVar(m, vtype=GRB.CONTINUOUS, name="Z")
 
-    slack_var = [model.addVar(vtype=GRB.CONTINUOUS, name="Slack " + str(i)) for i in range(n)]
+    slack_var = [model.addVar(vtype=GRB.CONTINUOUS, name="Slack " + str(i)) for i in range(n+l)]
     # Set objective function
     if slack == False:
         model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)), GRB.MINIMIZE)
     else:
-        model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) + 20 * gp.quicksum(slack_var[i] for i in range(n)), GRB.MINIMIZE)
+        model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) + 20 * gp.quicksum(slack_var[i] for i in range(n+l)), GRB.MINIMIZE)
 
     # Constraints
     constraint1 = []
@@ -114,13 +114,22 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack = False):
                 )
             )
 
-    for g in range(l):
-        constraint2.append(
-            model.addConstr(
-                gp.quicksum(t[g][k] * Z[k] for k in range(m)) >= beta[g],
-                name="Constraint2_" + str(g),
-            )
-        )
+    if slack == False:
+      for g in range(l):
+          constraint2.append(
+              model.addConstr(
+                  gp.quicksum(t[g][k] * Z[k] for k in range(m)) >= beta[g],
+                  name="Constraint2_" + str(g),
+              )
+          )
+    else:
+      for g in range(l):
+          constraint2.append(
+              model.addConstr(
+                  gp.quicksum(t[g][k] * Z[k] for k in range(m)) + slack_var[n+g]>= beta[g],
+                  name="Constraint2_" + str(g),
+              )
+          )
 
     constraint_3 = [
         model.addConstr(gp.quicksum(Z[k] for k in range(m)) == K, name="Constraint3")
