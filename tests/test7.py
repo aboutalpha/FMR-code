@@ -4,7 +4,7 @@ from gurobipy import Env
 env = Env()
 env.setParam('LogToConsole', 0)
 env.start()
-filename = "test6"
+
 n = 200
 K = 5
 seed = 5
@@ -25,7 +25,7 @@ r = dist.copy()
 s = clusters.copy()
 m = K
 
-main_loop("test7_slack7", 1500, K, n, m, l, r, beta, s, t, alpha,
+main_loop("test7_slack10", 3, K, n, m, l, r, beta, s, t, alpha,
           M, q, lower, upper, X[:, 0], X[:, 1], centers)
 
 env.dispose()

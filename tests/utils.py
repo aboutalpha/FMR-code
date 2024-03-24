@@ -63,7 +63,7 @@ def master_warm_start(model, Z, m, n, l, warm_start_new_columns, slack=False, sl
 def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
     # Create a Gurobi model
     model = gp.Model("MasterProblem")
-    # model.Params.LogToConsole = 0
+    model.Params.LogToConsole = 0
 
     # Create decision variables
     Z = []
@@ -79,7 +79,8 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
                            for i in range(m)), GRB.MINIMIZE)
     else:
         model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) +
-                           100 * gp.quicksum(slack_var[i] for i in range(n+l)), GRB.MINIMIZE)
+                           20 * gp.quicksum(slack_var[i] for i in range(n)) + 
+                           100 * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
 
     # Constraints
     constraint1 = []
@@ -221,7 +222,7 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
     model = gp.Model("PricingProblem")
     model.Params.PoolSearchMode = 2
     model.Params.PoolSolutions = 10
-    model.Params.TimeLimit = 5
+    model.Params.TimeLimit = 2
     model.Params.MIPGap = 0.1
     # model.Params.LogToConsole = 0
 
@@ -324,6 +325,9 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
             last_model_write = counter
             master_model.write("./model_write/" + file_name + "_out" +
                                str(counter) + ".lp")
+            master_model.write("./model_write/" + file_name + "_out" +
+                               str(counter) + ".sol")
+            
 
         objectives.append(masterobj)
         master_solutions.append(optimal_values_Z)
@@ -378,20 +382,28 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
 
 def terminate_helper(file_name, all_clusters, objectives, master_solutions, counter, slacks):
     clusters_mat = []
-    objectives_vec = []
+    distances_vec = []
+    t_mat = []
     for i in all_clusters:
-        objectives_vec.append(i[2])
+        distances_vec.append(i[2])
         clusters_mat.append(i[0] + i[1])
+        t_mat.append(i[3])
     clusters_mat = np.array(clusters_mat)
-    objectives_vec = np.array(objectives_vec)
+    distances_vec = np.array(distances_vec)
+    t_mat = np.array(t_mat)
+    np.savetxt("./model_matrix/"+file_name+"_t.txt", t_mat)
     np.savetxt("./model_matrix/"+file_name+"_clusters.txt", clusters_mat)
-    np.savetxt("./model_matrix/"+file_name+"_objectives.txt", objectives_vec)
-    # master_solutions = np.array(master_solutions)
-    # objectives = np.array(objectives)
+    np.savetxt("./model_matrix/"+file_name+"_distances.txt", distances_vec)
     np.savetxt("./model_matrix/"+file_name +
                "_slacks.txt", np.array(slacks))
-    # np.savetxt("./model_matrix/"+file_name +
-    #            "_objectives.txt", objectives)
+    np.savetxt("./model_matrix/"+file_name +
+               "_objectives.txt", np.array(objectives))
+    
+    max_length = max(len(sublist) for sublist in master_solutions)
+    padded_list = [sublist + [0] * (max_length - len(sublist)) for sublist in master_solutions]
+    master_solutions_export = np.array(padded_list)
+    
+    np.savetxt("./model_matrix/"+file_name +"_solutions.txt", master_solutions_export)
 
     print("Terminate")
     print("Number of iterations", counter)
@@ -550,7 +562,7 @@ def solve_initial_feasible_solution(n, l, alpha, beta, K, M, lower, upper, group
     y = model.addMVar((l, K), vtype=GRB.BINARY, name="Y")
 
     # Objective function
-    model.setObjective(0, GRB.MINIMIZE)
+    model.setObjective(y.sum(), GRB.MAXIMIZE)
 
     # Constraints
     constraints = []
