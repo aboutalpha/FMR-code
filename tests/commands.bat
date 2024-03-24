@@ -1,1 +1,1 @@
-python test7.py > ./outputs/out7_slack5.txt
+python ./test7.py > ./logs/out7_slack7.log

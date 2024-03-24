@@ -1,0 +1,174 @@
+Iteration #1
+Time 2024-03-07 22:46:41.131948
+Set parameter Username
+Academic license - for non-commercial use only - expires 2025-02-08
+1 Slack variables [0.0, 0.0, 0.0, 1.0, 0.0]
+1 Sum of Slack Variables 1.0
+1 Master Objective 2.5
+1 Master Solution [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+1 Master Dual 0.0
+Set parameter PoolSearchMode to value 2
+Set parameter TimeLimit to value 50
+Set parameter MIPGap to value 0.01
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (win64 - Windows 11+.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 14 columns and 27 nonzeros
+Model fingerprint: 0xe56e389c
+Model has 5 quadratic constraints
+Variable types: 7 continuous, 7 integer (7 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+03]
+  Objective range  [5e-01, 1e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [2e+00, 1e+03]
+  QRHS range       [1e+03, 1e+03]
+Presolve added 0 rows and 1 columns
+Presolve removed 1 rows and 0 columns
+Presolve time: 0.02s
+Presolved: 8 rows, 15 columns, 36 nonzeros
+Presolved model has 1 quadratic constraint(s)
+Variable types: 8 continuous, 7 integer (7 binary)
+
+Root relaxation: objective -2.498667e+00, 5 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -2.49867    0    2          -   -2.49867      -     -    0s
+H    0     0                       1.5000000   -2.49867   267%     -    0s
+H    0     0                       0.0000000   -2.49867      -     -    0s
+     0     0   -1.50000    0    2    0.00000   -1.50000      -     -    0s
+     0     0   -1.49996    0    5    0.00000   -1.49996      -     -    0s
+     0     0   -1.49973    0    5    0.00000   -1.49973      -     -    0s
+     0     0   -1.49973    0    5    0.00000   -1.49973      -     -    0s
+     0     0   -1.49447    0    5    0.00000   -1.49447      -     -    0s
+     0     0   -1.49402    0    5    0.00000   -1.49402      -     -    0s
+     0     0   -1.47477    0    4    0.00000   -1.47477      -     -    0s
+     0     0   -1.47324    0    5    0.00000   -1.47324      -     -    0s
+     0     0   -1.47156    0    5    0.00000   -1.47156      -     -    0s
+     0     0   -1.47156    0    5    0.00000   -1.47156      -     -    0s
+     0     0   -1.47156    0    5    0.00000   -1.47156      -     -    0s
+     0     0   -1.47156    0    5    0.00000   -1.47156      -     -    0s
+     0     0   -1.47156    0    5    0.00000   -1.47156      -     -    0s
+H    0     0                      -0.0859788   -1.47156  1612%     -    0s
+     0     2   -1.47156    0    5   -0.08598   -1.47156  1612%     -    0s
+
+Optimal solution found at node 71 - now completing solution pool...
+
+    Nodes    |    Current Node    |      Pool Obj. Bounds     |     Work
+             |                    |   Worst                   |
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+    71     2          -    5               -    0.58453      -   3.5    0s
+
+Cutting planes:
+  Gomory: 1
+  MIR: 6
+  RLT: 2
+
+Explored 85 nodes (322 simplex iterations) in 0.07 seconds (0.00 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 5: -0.0859788 0 0.690481 ... 220.118
+No other solutions better than 220.118
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective -8.597875948056e-02, best bound -8.597875948056e-02, gap 0.0000%
+Number of solutions 5
+Reduced Cost [-0.085978759480561]
+Solutions Found [[1, 1, 0, 1, 0]]
+1 Solution 0 Pricing New cluster [1, 1, 0, 1, 0]
+1 Solution 0 1.3333333333333335
+Iteration #2
+Time 2024-03-07 22:46:41.252877
+2 Slack variables [0.0, 0.0, 0.0, 0.0, 0.0]
+2 Sum of Slack Variables 0.0
+2 Master Objective 2.3333333333333335
+2 Master Solution [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0]
+2 Master Dual -0.0
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (win64 - Windows 11+.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 14 columns and 27 nonzeros
+Model fingerprint: 0x14a6861c
+Model has 5 quadratic constraints
+Variable types: 7 continuous, 7 integer (7 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 1e+03]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+03]
+  Objective range  [5e-01, 1e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [2e+00, 1e+03]
+  QRHS range       [1e+03, 1e+03]
+
+MIP start from previous solve produced solution with objective 4.80339e-08 (0.00s)
+Loaded MIP start from previous solve with objective 4.79614e-08
+
+Presolve added 0 rows and 1 columns
+Presolve removed 1 rows and 0 columns
+Presolve time: 0.00s
+Presolved: 8 rows, 15 columns, 36 nonzeros
+Presolved model has 1 quadratic constraint(s)
+Variable types: 8 continuous, 7 integer (7 binary)
+
+Root relaxation: objective -2.415222e+00, 5 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -2.41522    0    2    0.00000   -2.41522      -     -    0s
+H    0     0                       0.0000000   -2.41522      -     -    0s
+     0     0   -1.33333    0    2    0.00000   -1.33333      -     -    0s
+     0     0   -1.33331    0    5    0.00000   -1.33331      -     -    0s
+     0     0   -1.33307    0    5    0.00000   -1.33307      -     -    0s
+     0     0   -1.33307    0    5    0.00000   -1.33307      -     -    0s
+     0     0   -1.32781    0    5    0.00000   -1.32781      -     -    0s
+     0     0   -1.32754    0    5    0.00000   -1.32754      -     -    0s
+     0     0   -1.30921    0    4    0.00000   -1.30921      -     -    0s
+     0     0   -1.30904    0    5    0.00000   -1.30904      -     -    0s
+     0     0   -1.30751    0    5    0.00000   -1.30751      -     -    0s
+     0     0   -1.30751    0    5    0.00000   -1.30751      -     -    0s
+     0     0   -1.30751    0    5    0.00000   -1.30751      -     -    0s
+     0     2   -1.30751    0    5    0.00000   -1.30751      -     -    0s
+
+Optimal solution found at node 59 - now completing solution pool...
+
+    Nodes    |    Current Node    |      Pool Obj. Bounds     |     Work
+             |                    |   Worst                   |
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+    59    10     cutoff    7               -    0.47267      -   3.2    0s
+
+Cutting planes:
+  Gomory: 1
+  MIR: 6
+  RLT: 2
+
+Explored 85 nodes (314 simplex iterations) in 0.06 seconds (0.00 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 4: 2.37783e-08 0.690481 1.6459 48003.3 
+No other solutions better than 48003.3
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective 2.377832197809e-08, best bound 2.377832197809e-08, gap 0.0000%
+Reduced Cost [2.377832197808516e-08, 0.6904806706157753, 1.6458980337504636, 48003.25]
+Solutions Found [[1, 1, 0, 1, 0], [1, 0, 0, 1, 1], [1, 1, 0, 1, 1], [0, 0, 1, 1, 1]]
+Terminate
+Number of iterations 2
+Objective: 2.3333333333333335
+Z:
+[0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0]
+s:
+[[1, 1, 0, 0, 0], [0, 0, 1, 1, 1], [1, 0, 0, 0, 1], [0, 1, 0, 0, 1], [0, 0, 1, 0, 1], [0, 0, 1, 1, 0], [1, 1, 0, 1, 0]]
+Clusters:
+[0, 0, 1, 0, 1]
+[1, 1, 0, 1, 0]
