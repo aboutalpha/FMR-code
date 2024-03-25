@@ -292,9 +292,10 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
     pbar = tqdm(total=iterations)
     objectives = []
     master_solutions = []
+    repeat_check = []
     times = []
     slacks = []
-    model_write_frequency = 100
+    model_write_frequency = 500
     last_model_write = -model_write_frequency
 
     all_clusters = []
@@ -354,17 +355,11 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
             return terminate_helper(file_name, all_clusters, objectives, master_solutions, counter, slacks)
 
         # Prepare for next iteration
-        repeat_check = []
         warm_start_new_columns = []
         for solNum, sol in enumerate(pricing_new_columns):
             (cluster, old_t, dist, (xc, yc)) = sol
             if cluster in repeat_check:
-                print("Not accepting solution " + str(solNum) +
-                      "because it was just found in this iteration of the pricing problem. " + str(cluster))
-                continue
-            elif cluster in s:
-                print("Not accepting solution " + str(solNum) +
-                      "because it already exists in columns of the master problem. " + str(cluster))
+                print("Not accepting repeated solution " + str(solNum) + str(cluster))
                 continue
             repeat_check.append(cluster)
             xc, yc, dist = calc_geometric_center_dist(cluster, x, y)
@@ -403,7 +398,7 @@ def terminate_helper(file_name, all_clusters, objectives, master_solutions, coun
     padded_list = [sublist + [0] * (max_length - len(sublist)) for sublist in master_solutions]
     master_solutions_export = np.array(padded_list)
     
-    np.savetxt("./model_matrix/"+file_name +"_solutions.txt", master_solutions_export)
+    np.savetxt("./model_matrix/"+file_name +"_solutions.txt", master_solutions_export, fmt='%.5f')
 
     print("Terminate")
     print("Number of iterations", counter)
