@@ -1,2 +1,4 @@
 tests/logs/out7_slack6.log
 tests/model_matrix/test7_slack9_solutions.txt
+tests/logs/test9_slack2.log
+tests/model_matrix/test9_slack2_slacks.txt

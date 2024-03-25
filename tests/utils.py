@@ -80,7 +80,7 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
     else:
         model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) +
                            20 * gp.quicksum(slack_var[i] for i in range(n)) + 
-                           100 * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
+                           1000 * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
 
     # Constraints
     constraint1 = []
