@@ -5,7 +5,7 @@ env = Env()
 env.setParam('LogToConsole', 0)
 env.start()
 
-n = 1000
+n = 2000
 K = 6
 seed = 5
 l = 4
@@ -25,7 +25,7 @@ r = dist.copy()
 s = clusters.copy()
 m = K
 
-main_loop("test9_slack2", 5000, K, n, m, l, r, beta, s, t, alpha,
+main_loop("test9_slack3", 1500, K, n, m, l, r, beta, s, t, alpha,
           M, q, lower, upper, X[:, 0], X[:, 1], centers)
 
 env.dispose()
