@@ -209,10 +209,25 @@ def pricing_warm_start(model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var,
         #   print(f"{var.varName} = {var.Xn}")
 
         cluster = [int(np.round(s_var[i].Xn)) for i in range(n)]
-        dist = sum(float(r_var[i].Xn) for i in range(n))
+        for i in range(n):
+            if r_var[i].Xn == 0.16325638587582536:
+                print("What is this", r_var[i], s_var[i], i)
+        dist = [float(r_var[i].Xn) for i in range(n)]
         new_t = [int(np.round(t_var[g].Xn)) for g in range(l)]
         (xc, yc) = (cx_var.Xn, cy_var.Xn)
         pricing_new_columns.append((cluster, new_t, dist, (xc, yc)))
+        
+        c0 = model.getConstrs()
+        
+        for i in range(l,l+n):
+            print(c0[i])
+            print(c0[i].getAttr('ConstrName'))
+            print(c0[i].getAttr('Sense'), c0[i].getAttr('RHS'), c0[i].getAttr('Slack'))
+            
+        
+        print("Obj Bound", model.PoolObjBound)
+        print("Obj value", model.PoolObjVal)
+        print("Gap", np.abs(model.PoolObjBound - model.PoolObjVal) / np.abs(model.PoolObjVal))
 
     return objectives, pricing_new_columns
 
@@ -250,7 +265,7 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
 
     for i in range(n):
         constraints.append(model.addConstr(
-            r[i] + M*(1-s[i]) >= (x[i] - cx)**2 + (y[i] - cy)**2, name="Constraint2"))
+            r[i] ** 2 + M*(1-s[i]) >= ((x[i] - cx)**2 + (y[i] - cy)**2), name="Constraint2"))
         constraints.append(model.addConstr(r[i] >= 0, name="Constraint3"))
 
     constraints.append(model.addConstr(gp.quicksum(
@@ -262,9 +277,13 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
     model.optimize()
 
     cluster = [int(np.round(s[i].x)) for i in range(n)]
-    dist = sum(float(r[i].x) for i in range(n))
+    dist = [float(r[i].x) for i in range(n)]
     new_t = [int(np.round(t[g].x)) for g in range(l)]
     (xc, yc) = (cx.x, cy.x)
+    
+    print("MIP Gap", model.MIPGap)
+    print("Obj Bound", model.ObjBound)
+    print("Obj value", model.ObjVal)
 
     return model, r, s, t, cx, cy, [model.objVal], [(cluster, new_t, dist, (xc, yc))]
 
@@ -321,13 +340,6 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         else:
             master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum = master_warm_start(
                 master_model, Z, m, n, l, warm_start_new_columns, True, slack_var)
-
-        if counter - model_write_frequency >= last_model_write or counter == iterations:
-            last_model_write = counter
-            master_model.write("./model_write/" + file_name + "_out" +
-                               str(counter) + ".lp")
-            master_model.write("./model_write/" + file_name + "_out" +
-                               str(counter) + ".sol")
             
 
         objectives.append(masterobj)
@@ -346,6 +358,17 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         else:
             reduced_cost, pricing_new_columns = pricing_warm_start(
                 pricing_model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var, cy_var)
+        
+        if counter - model_write_frequency >= last_model_write or counter == iterations:
+            last_model_write = counter
+            master_model.write("./model_write/" + file_name + "_master_out" +
+                               str(counter) + ".lp")
+            master_model.write("./model_write/" + file_name + "_master_out" +
+                               str(counter) + ".sol")
+            pricing_model.write("./model_write/" + file_name + "_pricing_out" +
+                               str(counter) + ".lp")
+            pricing_model.write("./model_write/" + file_name + "_pricing_out" +
+                               str(counter) + ".sol")
 
         print("Reduced Cost", reduced_cost)
         print("New Columns Found", pricing_new_columns)
@@ -357,15 +380,20 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         # Prepare for next iteration
         warm_start_new_columns = []
         for solNum, sol in enumerate(pricing_new_columns):
-            (cluster, old_t, dist, (xc, yc)) = sol
+            (cluster, old_t, old_dist, (old_xc, old_yc)) = sol
             if cluster in repeat_check:
                 print("Not accepting repeated solution " + str(solNum) + str(cluster))
                 continue
             repeat_check.append(cluster)
-            xc, yc, dist = calc_geometric_center_dist(cluster, x, y)
+            xc, yc, dist, old_dist_recalc, old_dist_recalc_array = calc_geometric_center_dist(cluster, x, y, old_xc, old_yc)
 
             print(counter, "Solution", solNum, "Pricing New cluster", cluster)
             print(counter, "Solution", solNum, dist)
+            print("Compare", sum(old_dist), old_dist_recalc, dist, old_dist)
+            print("old_dist_1", old_dist)
+            print("old_dist_2", old_dist_recalc_array)
+            print("difference", list(np.array(old_dist) - np.array(old_dist_recalc_array)))
+            print("Compare center", (old_xc, old_yc), (xc,yc))
 
             new_t = t_value_correction(cluster, l, q, alpha, old_t)
             warm_start_new_columns.append((cluster, new_t, dist, (xc, yc)))
@@ -413,7 +441,7 @@ def terminate_helper(file_name, all_clusters, objectives, master_solutions, coun
     return all_clusters, objectives, master_solutions, counter, slacks
 
 
-def calc_geometric_center_dist(cluster, x, y):
+def calc_geometric_center_dist(cluster, x, y, old_xc, old_yc):
     xc = 0
     yc = 0
     size = sum(cluster)
@@ -424,12 +452,20 @@ def calc_geometric_center_dist(cluster, x, y):
     xc = xc / size
     yc = yc / size
     dist = 0
+    old_dist_recalc = 0
+    old_dist_recalc_array = []
 
     for j in range(len(cluster)):
         if cluster[j] == 1:
-            dist += (xc - x[j]) ** 2 + (yc - y[j]) ** 2
+            dist += ((xc - x[j]) ** 2 + (yc - y[j]) ** 2) ** 0.5
+            aux = ((old_xc - x[j]) ** 2 + (old_yc - y[j]) ** 2) ** 0.5
+            old_dist_recalc += aux
+            old_dist_recalc_array.append(aux)
+        else:
+            old_dist_recalc_array.append(0)
+    
 
-    return xc, yc, dist
+    return xc, yc, dist, old_dist_recalc, old_dist_recalc_array
 
 
 def initialize_clusters(X, K, l, alpha, beta, n, labels, M, lower, upper):
