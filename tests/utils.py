@@ -79,8 +79,8 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
                            for i in range(m)), GRB.MINIMIZE)
     else:
         model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) +
-                           20 * gp.quicksum(slack_var[i] for i in range(n)) + 
-                           1000 * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
+                           10 * gp.quicksum(slack_var[i] for i in range(n)) + 
+                           500 * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
 
     # Constraints
     constraint1 = []
@@ -192,6 +192,7 @@ def pricing_warm_start(model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var,
         - gp.quicksum(lmd[g] * t_var[g] for g in range(l)) \
         - delta
     model.setObjective(objective, GRB.MINIMIZE)
+    model.reset(1)
     model.optimize()
 
     nSolutions = model.SolCount
@@ -215,7 +216,7 @@ def pricing_warm_start(model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var,
         dist = [float(r_var[i].Xn) for i in range(n)]
         new_t = [int(np.round(t_var[g].Xn)) for g in range(l)]
         (xc, yc) = (cx_var.Xn, cy_var.Xn)
-        bound = model.PoolObjBound
+        bound = model.ObjBound
         objVal = model.PoolObjVal
         gap = np.abs(bound - objVal) / np.abs(objVal)
         pricing_new_columns.append((cluster, new_t, dist, (xc, yc), bound, objVal))
@@ -238,9 +239,9 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
     model = gp.Model("PricingProblem")
     model.Params.PoolSearchMode = 2
     model.Params.PoolSolutions = 10
-    model.Params.TimeLimit = 10
+    model.Params.TimeLimit = 5
     model.Params.MIPGap = 0.1
-    model.Params.LogToConsole = 0
+    #model.Params.LogToConsole = 0
 
     # Create decision variables
     r = model.addMVar(n, vtype=GRB.CONTINUOUS, name="R")
@@ -305,6 +306,18 @@ def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
             new_t.append(0)
     return new_t
 
+def write_model(master_model,file_name,counter,pricing_model):
+    master_model.write("./model_write/" + file_name + "_master_out" +
+                               str(counter) + ".mps")
+    master_model.write("./model_write/" + file_name + "_master_out" +
+                        str(counter) + ".sol")
+    pricing_model.write("./model_write/" + file_name + "_pricing_out" +
+                        str(counter) + ".mps")
+    pricing_model.write("./model_write/" + file_name + "_pricing_out" +
+                        str(counter) + ".mst")
+    pricing_model.write("./model_write/" + file_name + "_pricing_out" +
+                        str(counter) + ".sol")
+
 
 def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, lower, upper, x, y, centers):
     reduced_cost = 1
@@ -318,7 +331,7 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
     repeat_check = []
     times = []
     slacks = []
-    model_write_frequency = 500
+    model_write_frequency = 1000
     last_model_write = -model_write_frequency
 
     all_clusters = []
@@ -349,11 +362,11 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         objectives.append(masterobj)
         master_solutions.append(optimal_values_Z)
         slacks.append(optimal_slack)
-        print(counter, "Slack variables", optimal_slack)
+        #print(counter, "Slack variables", optimal_slack)
         print(counter, "Sum of Slack Variables", optimal_slack_sum)
         print(counter, "Master Objective", masterobj)
-        print(counter, "Master Solution", optimal_values_Z)
-        print(counter, "Master Dual", mu)
+        #print(counter, "Master Solution", optimal_values_Z)
+        #print(counter, "Master Dual", mu)
 
         # Solve pricing problem
         if not pricing_model:
@@ -365,20 +378,14 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         
         if counter - model_write_frequency >= last_model_write or counter == iterations:
             last_model_write = counter
-            master_model.write("./model_write/" + file_name + "_master_out" +
-                               str(counter) + ".lp")
-            master_model.write("./model_write/" + file_name + "_master_out" +
-                               str(counter) + ".sol")
-            pricing_model.write("./model_write/" + file_name + "_pricing_out" +
-                               str(counter) + ".lp")
-            pricing_model.write("./model_write/" + file_name + "_pricing_out" +
-                               str(counter) + ".sol")
+            write_model(master_model,file_name,counter,pricing_model)
 
         print("Reduced Cost", reduced_cost)
-        print("New Columns Found", pricing_new_columns)
-
+        #print("New Columns Found", pricing_new_columns)
+        
         # Check termination criteria
-        if reduced_cost[0] >= -1e-2:
+        if len(reduced_cost) == 0 or reduced_cost[0] >= -1e-2:
+            write_model(master_model,file_name,counter,pricing_model)
             return terminate_helper(file_name, all_clusters, objectives, master_solutions, counter, slacks)
 
         # Prepare for next iteration
