@@ -45,7 +45,7 @@ def master_optimize(model, m, n, l, Z, slack, slack_var):
     return model, mu, lmd, model.objVal, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum
 
 
-def master_warm_start(model, Z, m, n, l, warm_start_new_columns, slack=False, slack_var=None):
+def master_warm_start(model, Z, m, n, l, warm_start_new_columns, slack=(20,100,False), slack_var=None):
     print("Master Warm Start")
     print("warm_start_new_columns", warm_start_new_columns)
     sol_size = len(warm_start_new_columns)
@@ -60,7 +60,7 @@ def master_warm_start(model, Z, m, n, l, warm_start_new_columns, slack=False, sl
     return master_optimize(model, m, n, l, Z, slack, slack_var)
 
 
-def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
+def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=(20,100,False)):
     # Create a Gurobi model
     model = gp.Model("MasterProblem")
     model.Params.LogToConsole = 0
@@ -74,19 +74,19 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
     slack_var = [model.addVar(vtype=GRB.CONTINUOUS,
                               name="Slack " + str(i)) for i in range(n+l)]
     # Set objective function
-    if slack == False:
+    if slack[2] == False:
         model.setObjective(gp.quicksum(Z[i] * r[i]
                            for i in range(m)), GRB.MINIMIZE)
     else:
         model.setObjective(gp.quicksum(Z[i] * r[i] for i in range(m)) +
-                           10 * gp.quicksum(slack_var[i] for i in range(n)) + 
-                           500 * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
+                           slack[0] * gp.quicksum(slack_var[i] for i in range(n)) + 
+                           slack[1] * gp.quicksum(slack_var[i] for i in range(n,n+l)), GRB.MINIMIZE)
 
     # Constraints
     constraint1 = []
     constraint2 = []
 
-    if slack == False:
+    if slack[2] == False:
         for i in range(n):
             constraint1.append(
                 model.addConstr(
@@ -104,7 +104,7 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=False):
                 )
             )
 
-    if slack == False:
+    if slack[2] == False:
         for g in range(l):
             constraint2.append(
                 model.addConstr(
@@ -227,9 +227,9 @@ def pricing_warm_start(model, r_var, mu, s_var, lmd, t_var, delta, n, l, cx_var,
         #     print(c0[i].getAttr('ConstrName'))
         #     print(c0[i].getAttr('Sense'), c0[i].getAttr('RHS'), c0[i].getAttr('Slack'))
         
-        print("Obj Bound",bound)
-        print("Obj value", objVal)
-        print("Gap", gap)
+        #print("Obj Bound",bound)
+        #print("Obj value", objVal)
+        #print("Gap", gap)
 
     return objectives, pricing_new_columns
 
@@ -238,8 +238,8 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
     # Create a Gurobi model
     model = gp.Model("PricingProblem")
     model.Params.PoolSearchMode = 2
-    model.Params.PoolSolutions = 10
-    model.Params.TimeLimit = 5
+    model.Params.PoolSolutions = 5
+    model.Params.TimeLimit = 10
     model.Params.MIPGap = 0.1
     #model.Params.LogToConsole = 0
 
@@ -267,7 +267,7 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
 
     for i in range(n):
         constraints.append(model.addConstr(
-            r[i] ** 2 + M*(1-s[i]) >= ((x[i] - cx)**2 + (y[i] - cy)**2), name="Constraint2"))
+            r[i] + M*(1-s[i]) >= ((x[i] - cx)**2 + (y[i] - cy)**2), name="Constraint2"))
         constraints.append(model.addConstr(r[i] >= 0, name="Constraint3"))
 
     constraints.append(model.addConstr(gp.quicksum(
@@ -308,7 +308,7 @@ def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
 
 def write_model(master_model,file_name,counter,pricing_model):
     master_model.write("./model_write/" + file_name + "_master_out" +
-                               str(counter) + ".mps")
+                               str(counter) + ".lp")
     master_model.write("./model_write/" + file_name + "_master_out" +
                         str(counter) + ".sol")
     pricing_model.write("./model_write/" + file_name + "_pricing_out" +
@@ -319,7 +319,7 @@ def write_model(master_model,file_name,counter,pricing_model):
                         str(counter) + ".sol")
 
 
-def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, lower, upper, x, y, centers):
+def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, lower, upper, x, y, centers,slack):
     reduced_cost = 1
     counter = 0
     master_model = None
@@ -353,10 +353,11 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         # Solve master problem
         if not master_model:
             master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum = solve_master_problem_gurobi(
-                n, m, l, r, s, t, beta, K, slack=True)
+                n, m, l, r, s, t, beta, K, slack=slack)
+            initial_obj = masterobj
         else:
             master_model, mu, lmd, masterobj, optimal_values_Z, delta, Z, slack_var, optimal_slack, optimal_slack_sum = master_warm_start(
-                master_model, Z, m, n, l, warm_start_new_columns, True, slack_var)
+                master_model, Z, m, n, l, warm_start_new_columns, slack, slack_var)
             
 
         objectives.append(masterobj)
@@ -393,7 +394,10 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
         for solNum, sol in enumerate(pricing_new_columns):
             (cluster, old_t, old_dist, (old_xc, old_yc), bound, objVal) = sol
             if cluster in repeat_check:
-                print("Not accepting repeated solution " + str(solNum) + str(cluster))
+                print("Not accepting repeated solution ", str(solNum), str(cluster))
+                continue
+            if objVal > -1e-2:
+                print("Positive reduced cost", solNum, objVal)
                 continue
             repeat_check.append(cluster)
             xc, yc, dist, old_dist_recalc, old_dist_recalc_array = calc_geometric_center_dist(cluster, x, y, old_xc, old_yc)
@@ -426,6 +430,9 @@ def terminate_helper(file_name, all_clusters, objectives, master_solutions, coun
         t_mat.append(i[3])
         bounds.append(i[4])
         objVals.append(i[5])
+    print(len(clusters_mat[0]))
+    print(len(clusters_mat[-1]))
+
     clusters_mat = np.array(clusters_mat)
     distances_vec = np.array(distances_vec)
     t_mat = np.array(t_mat)
@@ -474,8 +481,8 @@ def calc_geometric_center_dist(cluster, x, y, old_xc, old_yc):
 
     for j in range(len(cluster)):
         if cluster[j] == 1:
-            dist += ((xc - x[j]) ** 2 + (yc - y[j]) ** 2) ** 0.5
-            aux = ((old_xc - x[j]) ** 2 + (old_yc - y[j]) ** 2) ** 0.5
+            dist += ((xc - x[j]) ** 2 + (yc - y[j]) ** 2)
+            aux = ((old_xc - x[j]) ** 2 + (old_yc - y[j]) ** 2)
             old_dist_recalc += aux
             old_dist_recalc_array.append(aux)
         else:

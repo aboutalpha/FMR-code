@@ -4,3 +4,8 @@ tests/logs/test9_slack2.log
 tests/model_matrix/test9_slack2_slacks.txt
 tests/model_matrix/test9_slack3_slacks.txt
 tests/logs/test9_slack3.log
+tests/logs/test9_slack10.log
+tests/model_matrix/test9_slack10_solutions.txt
+tests/model_matrix/test9_slack7_clusters.txt
+tests/model_write/test9_slack7_master_out1000.mps
+tests/model_write/test9_slack7_master_out901.mps

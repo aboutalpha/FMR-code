@@ -25,7 +25,7 @@ r = dist.copy()
 s = clusters.copy()
 m = K
 
-main_loop("test9_slack10", 3000, K, n, m, l, r, beta, s, t, alpha,
+main_loop("test9_slack11", 3000, K, n, m, l, r, beta, s, t, alpha,
           M, q, lower, upper, X[:, 0], X[:, 1], centers)
 
 env.dispose()
