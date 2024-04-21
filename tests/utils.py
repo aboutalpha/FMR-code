@@ -48,6 +48,8 @@ def master_optimize(model, m, n, l, Z, slack, slack_var):
 def master_warm_start(model, Z, m, n, l, warm_start_new_columns, slack=(20,100,False), slack_var=None):
     print("Master Warm Start")
     print("warm_start_new_columns", warm_start_new_columns)
+    model.reset(1)
+    
     sol_size = len(warm_start_new_columns)
     for solNum, sol in enumerate(warm_start_new_columns):
         (cluster, new_t, new_r, (xc, yc), bound, objVal) = sol
@@ -63,6 +65,7 @@ def master_warm_start(model, Z, m, n, l, warm_start_new_columns, slack=(20,100,F
 def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=(20,100,False)):
     # Create a Gurobi model
     model = gp.Model("MasterProblem")
+    #model.Params.TimeLimit = 5
     model.Params.LogToConsole = 0
 
     # Create decision variables
@@ -239,9 +242,9 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
     model = gp.Model("PricingProblem")
     model.Params.PoolSearchMode = 2
     model.Params.PoolSolutions = 5
-    model.Params.TimeLimit = 10
+    model.Params.TimeLimit = 5
     model.Params.MIPGap = 0.1
-    #model.Params.LogToConsole = 0
+    model.Params.LogToConsole = 0
 
     # Create decision variables
     r = model.addMVar(n, vtype=GRB.CONTINUOUS, name="R")
@@ -308,7 +311,7 @@ def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
 
 def write_model(master_model,file_name,counter,pricing_model):
     master_model.write("./model_write/" + file_name + "_master_out" +
-                               str(counter) + ".lp")
+                               str(counter) + ".mps")
     master_model.write("./model_write/" + file_name + "_master_out" +
                         str(counter) + ".sol")
     pricing_model.write("./model_write/" + file_name + "_pricing_out" +
@@ -404,7 +407,7 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
 
             print(counter, "Solution", solNum, "Pricing New cluster", cluster)
             print(counter, "Solution", solNum, dist)
-            #print("Compare", sum(old_dist), old_dist_recalc, dist, old_dist)
+            print("Compare", sum(old_dist), old_dist_recalc, dist, old_dist)
             #print("old_dist_1", old_dist)
             #print("old_dist_2", old_dist_recalc_array)
             #print("difference", list(np.array(old_dist) - np.array(old_dist_recalc_array)))
