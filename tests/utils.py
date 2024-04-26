@@ -66,7 +66,7 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=(20,100,False))
     # Create a Gurobi model
     model = gp.Model("MasterProblem")
     #model.Params.TimeLimit = 5
-    model.Params.LogToConsole = 0
+    #model.Params.LogToConsole = 0
 
     # Create decision variables
     Z = []
@@ -140,7 +140,7 @@ def solve_master_problem_gurobi(n, m, l, r, s, t, beta, K, slack=(20,100,False))
 def solve_master_problem_integer(n, m, l, r, s, t, beta, K):
     # Create a Gurobi model
     model = gp.Model("MasterProblemInteger")
-    model.Params.LogToConsole = 0
+    #model.Params.LogToConsole = 0
 
     # Create decision variables
     Z = model.addMVar(m, vtype=GRB.BINARY, name="Z")
@@ -280,20 +280,58 @@ def solve_pricing_problem_gurobi(n, l, r, q, alpha, beta, delta, K, M, x, y, mu,
 
     # Solve the problem
     model.optimize()
-
-    cluster = [int(np.round(s[i].x)) for i in range(n)]
-    dist = [float(r[i].x) for i in range(n)]
-    new_t = [int(np.round(t[g].x)) for g in range(l)]
-    (xc, yc) = (cx.x, cy.x)
     
-    bound = model.ObjBound
-    objVal = model.ObjVal
     
-    print("MIP Gap", model.MIPGap)
-    print("Obj Bound", bound)
-    print("Obj value", objVal)
+    nSolutions = model.SolCount
 
-    return model, r, s, t, cx, cy, [model.objVal], [(cluster, new_t, dist, (xc, yc), bound, objVal)]
+    objectives = []
+    pricing_new_columns = []
+
+    for e in range(nSolutions):
+        # print("Solution Number",e)
+        model.setParam(GRB.Param.SolutionNumber, e)
+        # print("Objective", model.PoolObjVal)
+        objectives.append(model.PoolObjVal)
+        # Print variable values
+        # for var in model.getVars():
+        #   print(f"{var.varName} = {var.Xn}")
+
+        cluster = [int(np.round(s[i].Xn)) for i in range(n)]
+        for i in range(n):
+            if r[i].Xn == 0.16325638587582536:
+                print("What is this", r[i], s[i], i)
+        dist = [float(r[i].Xn) for i in range(n)]
+        new_t = [int(np.round(t[g].Xn)) for g in range(l)]
+        (xc, yc) = (cx.Xn, cy.Xn)
+        bound = model.ObjBound
+        objVal = model.PoolObjVal
+        gap = np.abs(bound - objVal) / np.abs(objVal)
+        pricing_new_columns.append((cluster, new_t, dist, (xc, yc), bound, objVal))
+        
+        #c0 = model.getConstrs()
+        # for i in range(l,l+n):
+        #     print(c0[i])
+        #     print(c0[i].getAttr('ConstrName'))
+        #     print(c0[i].getAttr('Sense'), c0[i].getAttr('RHS'), c0[i].getAttr('Slack'))
+        
+        #print("Obj Bound",bound)
+        #print("Obj value", objVal)
+        #print("Gap", gap)
+    
+
+    # cluster = [int(np.round(s[i].x)) for i in range(n)]
+    # dist = [float(r[i].x) for i in range(n)]
+    # new_t = [int(np.round(t[g].x)) for g in range(l)]
+    # (xc, yc) = (cx.x, cy.x)
+    
+    # bound = model.ObjBound
+    # objVal = model.ObjVal
+    
+    # print("MIP Gap", model.MIPGap)
+    # print("Obj Bound", bound)
+    # print("Obj value", objVal)
+
+    return model, r, s, t, cx, cy, objectives, pricing_new_columns
 
 
 def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
@@ -310,16 +348,11 @@ def t_value_correction(new_cluster, l, q, alpha, optimal_values_t):
     return new_t
 
 def write_model(master_model,file_name,counter,pricing_model):
-    master_model.write("./model_write/" + file_name + "_master_out" +
-                               str(counter) + ".mps")
-    master_model.write("./model_write/" + file_name + "_master_out" +
-                        str(counter) + ".sol")
-    pricing_model.write("./model_write/" + file_name + "_pricing_out" +
-                        str(counter) + ".mps")
-    pricing_model.write("./model_write/" + file_name + "_pricing_out" +
-                        str(counter) + ".mst")
-    pricing_model.write("./model_write/" + file_name + "_pricing_out" +
-                        str(counter) + ".sol")
+    master_model.write("./model_write/" + file_name + "_master_out" + str(counter) + ".lp")
+    master_model.write("./model_write/" + file_name + "_master_out" + str(counter) + ".sol")
+    #pricing_model.write("./model_write/" + file_name + "_pricing_out" +str(counter) + ".mps")
+    #pricing_model.write("./model_write/" + file_name + "_pricing_out" +str(counter) + ".mst")
+    #pricing_model.write("./model_write/" + file_name + "_pricing_out" +str(counter) + ".sol")
 
 
 def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, lower, upper, x, y, centers,slack):
@@ -334,7 +367,7 @@ def main_loop(file_name, iterations, K, n, m, l, r, beta, s, t, alpha, M, q, low
     repeat_check = []
     times = []
     slacks = []
-    model_write_frequency = 1000
+    model_write_frequency = 100
     last_model_write = -model_write_frequency
 
     all_clusters = []
